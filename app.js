@@ -38,6 +38,16 @@ app.post('/login', (req, res) => {
     });
 });
 
+// --- get today's expenses ---
+app.get('/expenses/today/:userId', (req, res) => {
+    const userId = req.params.userId;
+    const sql = "SELECT item, paid, date FROM expense WHERE user_id=? AND DATE(date)=CURDATE()";
+    con.query(sql, [userId], (err, rows) => {
+        if (err) return res.status(500).send('DB error');
+        res.json(rows);
+    });
+});
+
 
 app.listen(3000, () => {
     console.log('Server is running');
