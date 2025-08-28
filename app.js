@@ -36,6 +36,34 @@ app.get('/expenses', (req, res) => {
     });
 });
 
+// ----------------- ADD NEW EXPENSE -----------------
+app.post('/expenses', (req, res) => {
+    const { user_id, item, paid } = req.body;
+
+    if (!user_id || !item || !paid) {
+        return res.status(400).send("Missing required fields");
+    }
+
+    const sql = "INSERT INTO expense (user_id, item, paid, date) VALUES (?, ?, ?, NOW())";
+    con.query(sql, [user_id, item, paid], (err, result) => {
+        if (err) return res.status(500).send("Database server error");
+        res.send(`Expense '${item}' added successfully with id ${result.insertId}`);
+    });
+});
+
+// ----------------- DELETE AN EXPENSE -----------------
+app.delete('/expenses/:id', (req, res) => {
+    const { id } = req.params;
+    const sql = "DELETE FROM expense WHERE id = ?";
+    con.query(sql, [id], (err, result) => {
+        if (err) return res.status(500).send("Database server error");
+        if (result.affectedRows === 0) {
+            return res.status(404).send("Expense not found");
+        }
+        res.send("Deleted!");
+    });
+});
+
 // ----------------- RUN SERVER -------------------
 app.listen(3000, () => {
     console.log('Server is running');
