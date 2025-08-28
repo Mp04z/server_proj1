@@ -1,12 +1,12 @@
-const express = require('express');
+
+
+
+const app = express();
 const bcrypt = require('bcrypt');
 const con = require('./db');
 
-const app = express();
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 // ----------------- LOGIN -----------------
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
@@ -22,21 +22,36 @@ app.post('/login', (req, res) => {
                 res.send('Login OK');
             } else {
                 res.status(401).send('Wrong password');
+
+                app.get('/password/:raw', (req, res) => {
+                    const raw = req.params.raw;
+                    bcrypt.hash(raw, 10, (err, hash) => {
+                        if (err) {
+                            return res.status(500).send('Hashing error');
+                        }
+                        res.send(hash);
+                    })
+                })
             }
         });
     });
 });
 
-// ----------------- GET ALL EXPENSES -----------------
-app.get('/expenses', (req, res) => {
-    const sql = "SELECT id, item, paid, date FROM expense";
-    con.query(sql, (err, results) => {
-        if (err) return res.status(500).send("Database server error");
-        res.json(results);
-    });
-});
+                // ----------------- GET ALL EXPENSES -----------------
+                app.get('/expenses', (req, res) => {
+                    const sql = "SELECT id, item, paid, date FROM expense";
+                    con.query(sql, (err, results) => {
+                        if (err) return res.status(500).send("Database server error");
+                        res.json(results);
+                    });
+                });
 
-// ----------------- RUN SERVER -------------------
+                // ----------------- RUN SERVER -------------------
+                app.listen(3000, () => {
+                    console.log('Server is running');
+                });
+
+
 app.listen(3000, () => {
     console.log('Server is running');
 });
